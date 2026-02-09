@@ -28,5 +28,5 @@ if (-not $javaw) {
     exit 1
 }
 
-$arguments = '-jar "' + $jar.FullName + '"'
+$arguments = @("-jar", $jar.FullName)
 Start-Process -FilePath $javaw -ArgumentList $arguments -WorkingDirectory $dir
