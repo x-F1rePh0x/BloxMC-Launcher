@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {
   "latestVersion": "0.0.4",
   "downloadUrl": "https://raw.githubusercontent.com/x-F1rePh0x/BloxMC-Launcher/main/launcher/upload/launcher/BloxMC-Launcher-0.0.4.jar",
@@ -5,3 +6,12 @@
   "mandatory": false,
   "publishedAt": "2026-02-11"
 }
+=======
+{
+  "latestVersion": "0.0.4",
+  "downloadUrl": "https://raw.githubusercontent.com/x-F1rePh0x/BloxMC-Launcher/main/launcher/upload/launcher/BloxMC-Launcher-0.0.4.jar",
+  "changelog": "- Updated launcher binary\n- Installer now auto-syncs latest launcher after install",
+  "mandatory": false,
+  "publishedAt": "2026-02-11"
+}
+>>>>>>> 9c7cfeb (Publish launcher 0.0.4)
