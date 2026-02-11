@@ -1,0 +1,264 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <Color x:Key="BG0">#141527</Color>
+  <Color x:Key="BG1">#1A1F36</Color>
+  <Color x:Key="Panel">#23243E</Color>
+  <Color x:Key="Panel2">#272943</Color>
+  <Color x:Key="Stroke">#3E3B5C</Color>
+  <Color x:Key="TextPrimary">#F8FAFC</Color>
+  <Color x:Key="TextSecondary">#B8C0CC</Color>
+  <Color x:Key="AccentPurple">#8D5CF7</Color>
+  <Color x:Key="AccentPink">#FF6191</Color>
+
+  <SolidColorBrush x:Key="BG0Brush" Color="{StaticResource BG0}" />
+  <SolidColorBrush x:Key="BG1Brush" Color="{StaticResource BG1}" />
+  <SolidColorBrush x:Key="PanelBrush" Color="{StaticResource Panel}" />
+  <SolidColorBrush x:Key="Panel2Brush" Color="{StaticResource Panel2}" />
+  <SolidColorBrush x:Key="StrokeBrush" Color="{StaticResource Stroke}" />
+  <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimary}" />
+  <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondary}" />
+  <SolidColorBrush x:Key="AccentPurpleBrush" Color="{StaticResource AccentPurple}" />
+  <SolidColorBrush x:Key="AccentPinkBrush" Color="{StaticResource AccentPink}" />
+  <SolidColorBrush x:Key="DangerBrush" Color="#D24A72" />
+
+  <LinearGradientBrush x:Key="PrimaryButtonGradient" StartPoint="0,0" EndPoint="1,0">
+    <GradientStop Color="{StaticResource AccentPurple}" Offset="0" />
+    <GradientStop Color="{StaticResource AccentPink}" Offset="1" />
+  </LinearGradientBrush>
+
+  <LinearGradientBrush x:Key="WindowBackgroundGradient" StartPoint="0,0" EndPoint="1,1">
+    <GradientStop Color="#0E1121" Offset="0" />
+    <GradientStop Color="#171C33" Offset="1" />
+  </LinearGradientBrush>
+
+  <LinearGradientBrush x:Key="TopAccentGradient" StartPoint="0,0" EndPoint="1,0">
+    <GradientStop Color="#8D5CF7" Offset="0" />
+    <GradientStop Color="#FF3D77" Offset="1" />
+  </LinearGradientBrush>
+
+  <DropShadowEffect x:Key="CardShadow" Color="#66000000" BlurRadius="16" ShadowDepth="0" Opacity="0.28" />
+  <DropShadowEffect x:Key="SoftGlow" Color="#AA7C3AED" BlurRadius="22" ShadowDepth="0" Opacity="0.30" />
+
+  <Style x:Key="PanelCardStyle" TargetType="Border">
+    <Setter Property="CornerRadius" Value="12" />
+    <Setter Property="Background" Value="{StaticResource PanelBrush}" />
+    <Setter Property="BorderBrush" Value="#3A3E67" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="Effect" Value="{x:Null}" />
+  </Style>
+
+  <Style x:Key="PrimaryTextStyle" TargetType="TextBlock">
+    <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+  </Style>
+
+  <Style x:Key="SecondaryTextStyle" TargetType="TextBlock">
+    <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+  </Style>
+
+  <Style x:Key="PrimaryPillButton" TargetType="Button">
+    <Setter Property="Foreground" Value="#FFFFFF" />
+    <Setter Property="Padding" Value="24,10" />
+    <Setter Property="FontSize" Value="14" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="Background" Value="{StaticResource PrimaryButtonGradient}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Button">
+          <Border x:Name="ButtonRoot"
+                  Background="{TemplateBinding Background}"
+                  CornerRadius="999"
+                  BorderBrush="#55FFFFFF"
+                  BorderThickness="1"
+                  Effect="{StaticResource SoftGlow}"
+                  SnapsToDevicePixels="True">
+            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}" />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="ButtonRoot" Property="Opacity" Value="1.0" />
+            </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+              <Setter TargetName="ButtonRoot" Property="Opacity" Value="0.82" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+              <Setter TargetName="ButtonRoot" Property="Opacity" Value="0.45" />
+              <Setter TargetName="ButtonRoot" Property="Effect" Value="{x:Null}" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style x:Key="SecondaryPillButton" TargetType="Button">
+    <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+    <Setter Property="Padding" Value="22,10" />
+    <Setter Property="FontSize" Value="14" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Background" Value="#2B3150" />
+    <Setter Property="BorderBrush" Value="#57628E" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Button">
+          <Border x:Name="ButtonRoot"
+                  Background="{TemplateBinding Background}"
+                  BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}"
+                  CornerRadius="999"
+                  SnapsToDevicePixels="True">
+            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}" />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="ButtonRoot" Property="Background" Value="#323A60" />
+              <Setter TargetName="ButtonRoot" Property="BorderBrush" Value="#9BA7D7" />
+            </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+              <Setter TargetName="ButtonRoot" Property="Background" Value="#262D4D" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+              <Setter TargetName="ButtonRoot" Property="Opacity" Value="0.45" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style x:Key="DangerPillButton" TargetType="Button" BasedOn="{StaticResource SecondaryPillButton}">
+    <Setter Property="Foreground" Value="#FFEAF0" />
+    <Setter Property="BorderBrush" Value="#B46B86" />
+    <Setter Property="Background" Value="#332239" />
+  </Style>
+
+  <Style x:Key="CaptionButtonStyle" TargetType="Button">
+    <Setter Property="Width" Value="38" />
+    <Setter Property="Height" Value="30" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+    <Setter Property="Background" Value="#30365D" />
+    <Setter Property="BorderBrush" Value="#58639A" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Button">
+          <Border x:Name="CaptionRoot"
+                  CornerRadius="10"
+                  Background="{TemplateBinding Background}"
+                  BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}"
+                  SnapsToDevicePixels="True">
+            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="CaptionRoot" Property="Background" Value="#3A4270" />
+              <Setter TargetName="CaptionRoot" Property="BorderBrush" Value="#7583C7" />
+            </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+              <Setter TargetName="CaptionRoot" Property="Background" Value="#2A3256" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+              <Setter TargetName="CaptionRoot" Property="Opacity" Value="0.45" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style x:Key="CaptionCloseButtonStyle" TargetType="Button" BasedOn="{StaticResource CaptionButtonStyle}">
+    <Setter Property="BorderBrush" Value="#A55A74" />
+    <Setter Property="Foreground" Value="#FFD9E7" />
+    <Setter Property="Background" Value="#66324C" />
+  </Style>
+
+  <Style x:Key="TabButtonStyle" TargetType="Button">
+    <Setter Property="Padding" Value="18,8" />
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+    <Setter Property="Background" Value="#00000000" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Button">
+          <Grid SnapsToDevicePixels="True">
+            <Border x:Name="TabHover"
+                    CornerRadius="8"
+                    Background="Transparent" />
+            <Border x:Name="ActiveLine"
+                    Height="2"
+                    VerticalAlignment="Bottom"
+                    Margin="4,0,4,0"
+                    Background="{StaticResource TopAccentGradient}"
+                    Opacity="0" />
+            <ContentPresenter HorizontalAlignment="Center"
+                              VerticalAlignment="Center"
+                              Margin="{TemplateBinding Padding}" />
+          </Grid>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="TabHover" Property="Background" Value="#252B49" />
+              <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+            </Trigger>
+            <Trigger Property="Tag" Value="active">
+              <Setter TargetName="TabHover" Property="Background" Value="#232842" />
+              <Setter TargetName="ActiveLine" Property="Opacity" Value="1" />
+              <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style x:Key="TabButtonActiveStyle" TargetType="Button" BasedOn="{StaticResource TabButtonStyle}">
+    <Setter Property="Tag" Value="active" />
+  </Style>
+
+  <Style x:Key="ReadOnlyTextBoxStyle" TargetType="TextBox">
+    <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+    <Setter Property="Background" Value="#101225" />
+    <Setter Property="BorderBrush" Value="#313454" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="Padding" Value="10,8" />
+    <Setter Property="FontSize" Value="12.5" />
+  </Style>
+
+  <Style x:Key="PasswordBoxStyle" TargetType="PasswordBox">
+    <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+    <Setter Property="Background" Value="#101225" />
+    <Setter Property="BorderBrush" Value="#313454" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="Padding" Value="10,8" />
+    <Setter Property="FontSize" Value="12.5" />
+  </Style>
+
+  <Style x:Key="InstallerCheckBoxStyle" TargetType="CheckBox">
+    <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+    <Setter Property="FontSize" Value="12.5" />
+  </Style>
+
+  <Style x:Key="InstallProgressBarStyle" TargetType="ProgressBar">
+    <Setter Property="Height" Value="14" />
+    <Setter Property="Background" Value="#1A203A" />
+    <Setter Property="Foreground" Value="{StaticResource AccentPurpleBrush}" />
+    <Setter Property="BorderThickness" Value="0" />
+  </Style>
+
+  <Style x:Key="LogBoxStyle" TargetType="TextBox" BasedOn="{StaticResource ReadOnlyTextBoxStyle}">
+    <Setter Property="Background" Value="#0F1224" />
+    <Setter Property="FontFamily" Value="Consolas" />
+    <Setter Property="FontSize" Value="12" />
+  </Style>
+</ResourceDictionary>

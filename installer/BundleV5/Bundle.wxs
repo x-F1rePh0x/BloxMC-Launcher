@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Bundle
+    Name="BloxMC Launcher Setup"
+    Version="1.0.0.0"
+    Manufacturer="FirePhox"
+    UpgradeCode="{A72B6233-E74E-41D2-8CC4-6ECA2D0B1329}"
+    DisableModify="yes"
+    Compressed="yes">
+
+    <BootstrapperApplication SourceFile="..\BootstrapperV5\bin\Release\net8.0-windows\win-x64\publish\BloxMC.Launcher.Bootstrapper.exe" />
+
+    <Variable Name="BLOXMCMSILOG" Value="[TempFolder]BloxMC-Install.log" />
+
+    <Chain>
+      <MsiPackage
+        Id="BloxMCMsi"
+        SourceFile="..\payload\BloxMC.msi"
+        Visible="no"
+        Vital="yes"
+        Cache="keep"
+        LogPathVariable="BLOXMCMSILOG">
+        <MsiProperty Name="MSIINSTALLPERUSER" Value="1" />
+      </MsiPackage>
+    </Chain>
+  </Bundle>
+</Wix>
