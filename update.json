@@ -3,5 +3,5 @@
   "downloadUrl": "https://raw.githubusercontent.com/x-F1rePh0x/BloxMC-Launcher/main/launcher/upload/launcher/BloxMC-Launcher-0.0.4.jar",
   "changelog": "- Updated launcher binary\n- Installer now auto-syncs latest launcher after install",
   "mandatory": false,
-  "publishedAt": "2026-02-11"
+  "publishedAt": "2026-02-12"
 }
