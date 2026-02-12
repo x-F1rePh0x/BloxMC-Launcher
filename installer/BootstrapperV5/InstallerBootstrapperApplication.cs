@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Windows;
 using System.Windows.Interop;
 using WixToolset.BootstrapperApplicationApi;
@@ -22,8 +23,15 @@ internal sealed class InstallerBootstrapperApplication : BootstrapperApplication
     private bool _packageRegistered;
     private bool _canLaunchInstalledApp;
     private bool _hadExecutePackage;
+    private bool _actionInProgress;
+    private bool _requiresDetectBeforePlan;
     private int _exitCode;
     private LaunchAction _lastRequestedAction = LaunchAction.Install;
+    private LaunchAction? _pendingActionAfterDetect;
+    private string _pendingPlanningText = string.Empty;
+    private Timer? _applyHeartbeatTimer;
+    private DateTime _lastProgressUtc;
+    private DateTime _lastHeartbeatNoteUtc;
 
     protected override void Run()
     {
@@ -45,7 +53,9 @@ internal sealed class InstallerBootstrapperApplication : BootstrapperApplication
         _window.SetLogPath(_msiLogPath);
         _window.AppendLog("UI initialized.");
 
-        _window.InstallRequested += (_, _) => BeginAction(LaunchAction.Install, _isInstalled ? "Planning reinstall..." : "Planning install...");
+        _window.InstallRequested += (_, _) => BeginAction(
+            LaunchAction.Install,
+            _isInstalled ? "Planning reinstall..." : "Planning install...");
         _window.RepairRequested += (_, _) => BeginAction(LaunchAction.Repair, "Planning repair...");
         _window.UninstallRequested += (_, _) => BeginAction(LaunchAction.Uninstall, "Planning uninstall...");
         _window.RetryRequested += (_, _) => BeginAction(_lastRequestedAction, "Retrying action...");
@@ -61,6 +71,7 @@ internal sealed class InstallerBootstrapperApplication : BootstrapperApplication
         this.engine.Detect(IntPtr.Zero);
 
         app.Run();
+        StopApplyHeartbeat();
         this.engine.Quit(_exitCode);
     }
 
@@ -77,6 +88,9 @@ internal sealed class InstallerBootstrapperApplication : BootstrapperApplication
         ApplyBegin += (_, _) => Ui(() =>
         {
             _hadExecutePackage = false;
+            _lastProgressUtc = DateTime.UtcNow;
+            _lastHeartbeatNoteUtc = DateTime.MinValue;
+            StartApplyHeartbeat();
             _window?.SetBusy(true);
             _window?.SetStatus("Applying changes...");
             _window?.SetDetail("Running installer actions.");
@@ -96,10 +110,34 @@ internal sealed class InstallerBootstrapperApplication : BootstrapperApplication
             _window?.AppendLog("Package complete: " + e.PackageId + " status=" + e.Status);
         });
 
+        ExecuteFilesInUse += (_, e) => Ui(() =>
+        {
+            var files = e.Files?.Where(f => !string.IsNullOrWhiteSpace(f)).Take(3).ToArray() ?? Array.Empty<string>();
+            var sample = files.Length > 0 ? " Example: " + string.Join(", ", files) : string.Empty;
+            _window?.SetStatus("Files are in use.");
+            _window?.SetDetail("Close running BloxMC and Java processes, then retry." + sample);
+            _window?.AppendLog("Files in use detected for package " + e.PackageId + ". Count=" + (e.Files?.Count ?? 0) + ".");
+        });
+
+        ExecuteMsiMessage += (_, e) => Ui(() =>
+        {
+            if (!string.IsNullOrWhiteSpace(e.Message))
+            {
+                _window?.AppendLog("MSI: " + e.Message.Trim());
+            }
+        });
+
         ExecuteProgress += (_, e) => Ui(() =>
         {
+            _lastProgressUtc = DateTime.UtcNow;
             _window?.SetProgress(e.OverallPercentage);
             _window?.SetStatus("Working... " + e.OverallPercentage + "%");
+        });
+
+        Progress += (_, e) => Ui(() =>
+        {
+            _lastProgressUtc = DateTime.UtcNow;
+            _window?.SetProgress(e.OverallPercentage);
         });
 
         ElevateBegin += (_, _) => Ui(() =>
@@ -138,6 +176,27 @@ internal sealed class InstallerBootstrapperApplication : BootstrapperApplication
             _window?.SetLogPath(File.Exists(_msiLogPath) ? _msiLogPath : _bundleLogPath);
         });
 
+        var pendingAction = _pendingActionAfterDetect;
+        var pendingPlanningText = _pendingPlanningText;
+        _pendingActionAfterDetect = null;
+        _pendingPlanningText = string.Empty;
+
+        if (pendingAction.HasValue)
+        {
+            _requiresDetectBeforePlan = false;
+            _lastRequestedAction = pendingAction.Value;
+            Ui(() =>
+            {
+                _window?.SetInstalled(_isInstalled);
+                _window?.SetActionHint("MSI log: %TEMP%\\BloxMC-Install.log");
+                _window?.AppendLog("State refresh complete. Continuing action.");
+            });
+            PlanCurrentAction(pendingPlanningText);
+            return;
+        }
+
+        _actionInProgress = false;
+
         Ui(() =>
         {
             _window?.SetInstalled(_isInstalled);
@@ -157,9 +216,16 @@ internal sealed class InstallerBootstrapperApplication : BootstrapperApplication
 
     private void BeginAction(LaunchAction action, string planningText)
     {
+        if (_actionInProgress)
+        {
+            Ui(() => _window?.AppendLog("Action already running. Please wait..."));
+            return;
+        }
+
         _lastRequestedAction = action;
         _lastErrorDetails = string.Empty;
         _hadExecutePackage = false;
+        _actionInProgress = true;
 
         Ui(() =>
         {
@@ -170,13 +236,52 @@ internal sealed class InstallerBootstrapperApplication : BootstrapperApplication
             _window?.AppendLog(planningText.Replace("...", "."));
         });
 
-        this.engine.Plan(action);
+        if (_requiresDetectBeforePlan)
+        {
+            _pendingActionAfterDetect = action;
+            _pendingPlanningText = planningText;
+            Ui(() =>
+            {
+                _window?.SetStatus("Refreshing setup state...");
+                _window?.SetDetail("Syncing Burn state before planning.");
+                _window?.AppendLog("Refresh detect requested before planning.");
+            });
+
+            try
+            {
+                this.engine.Detect(IntPtr.Zero);
+            }
+            catch (Exception ex)
+            {
+                _actionInProgress = false;
+                _pendingActionAfterDetect = null;
+                _pendingPlanningText = string.Empty;
+                ShowFailure("Detect refresh failed.", ex.Message);
+            }
+            return;
+        }
+
+        PlanCurrentAction(planningText);
+    }
+
+    private void PlanCurrentAction(string planningText)
+    {
+        try
+        {
+            this.engine.Plan(_lastRequestedAction);
+        }
+        catch (Exception ex)
+        {
+            _actionInProgress = false;
+            ShowFailure("Planning failed.", planningText + " " + ex.Message);
+        }
     }
 
     private void OnPlanComplete(object? sender, PlanCompleteEventArgs e)
     {
         if (e.Status != 0)
         {
+            _actionInProgress = false;
             ShowFailure("Planning failed.", "Burn plan returned status " + e.Status + ".");
             return;
         }
@@ -189,11 +294,23 @@ internal sealed class InstallerBootstrapperApplication : BootstrapperApplication
             hwnd = new WindowInteropHelper(_window).Handle;
         }
 
-        this.engine.Apply(hwnd);
+        try
+        {
+            this.engine.Apply(hwnd);
+        }
+        catch (Exception ex)
+        {
+            _actionInProgress = false;
+            ShowFailure("Apply failed to start.", ex.Message);
+        }
     }
 
     private void OnApplyComplete(object? sender, ApplyCompleteEventArgs e)
     {
+        _actionInProgress = false;
+        _requiresDetectBeforePlan = true;
+        StopApplyHeartbeat();
+
         if (e.Status == 0)
         {
             if (_lastRequestedAction == LaunchAction.Uninstall && !_hadExecutePackage)
@@ -240,6 +357,7 @@ internal sealed class InstallerBootstrapperApplication : BootstrapperApplication
 
     private void ShowFailure(string summary, string details)
     {
+        StopApplyHeartbeat();
         _supportCode = "BLX-" + Guid.NewGuid().ToString("N")[..10].ToUpperInvariant();
         _lastErrorDetails = details;
 
@@ -265,8 +383,52 @@ internal sealed class InstallerBootstrapperApplication : BootstrapperApplication
 
     private void ShutdownApp(int code)
     {
+        StopApplyHeartbeat();
         _exitCode = code;
         Application.Current.Shutdown();
+    }
+
+    private void StartApplyHeartbeat()
+    {
+        StopApplyHeartbeat();
+        _applyHeartbeatTimer = new Timer(
+            _ => OnApplyHeartbeat(),
+            null,
+            TimeSpan.FromSeconds(20),
+            TimeSpan.FromSeconds(20));
+    }
+
+    private void StopApplyHeartbeat()
+    {
+        _applyHeartbeatTimer?.Dispose();
+        _applyHeartbeatTimer = null;
+    }
+
+    private void OnApplyHeartbeat()
+    {
+        if (!_actionInProgress)
+        {
+            return;
+        }
+
+        var now = DateTime.UtcNow;
+        if (now - _lastProgressUtc < TimeSpan.FromSeconds(20))
+        {
+            return;
+        }
+
+        if (now - _lastHeartbeatNoteUtc < TimeSpan.FromSeconds(30))
+        {
+            return;
+        }
+
+        _lastHeartbeatNoteUtc = now;
+
+        Ui(() =>
+        {
+            _window?.SetDetail("Still working. First install can take a minute.");
+            _window?.AppendLog("Still working...");
+        });
     }
 
     private void TrySetMsiLogVariable()
@@ -477,7 +639,7 @@ internal sealed class InstallerBootstrapperApplication : BootstrapperApplication
         }
         else
         {
-            _window.Dispatcher.Invoke(action);
+            _window.Dispatcher.BeginInvoke(action);
         }
     }
 }

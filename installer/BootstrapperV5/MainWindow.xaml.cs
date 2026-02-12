@@ -63,9 +63,14 @@ public partial class MainWindow : Window
         UninstallButton.IsEnabled = !busy;
         RetryButton.IsEnabled = !busy;
         FinishButton.IsEnabled = !busy;
-        MinimizeButton.IsEnabled = !busy;
-        MaximizeButton.IsEnabled = !busy;
-        CloseButton.IsEnabled = !busy;
+        if (busy && InstallProgressBar.Value <= 0)
+        {
+            InstallProgressBar.IsIndeterminate = true;
+        }
+        if (!busy)
+        {
+            InstallProgressBar.IsIndeterminate = false;
+        }
         Cursor = busy ? Cursors.Wait : Cursors.Arrow;
     }
 
@@ -87,6 +92,7 @@ public partial class MainWindow : Window
     public void SetProgress(int percent)
     {
         var safePercent = Math.Max(0, Math.Min(100, percent));
+        InstallProgressBar.IsIndeterminate = false;
         InstallProgressBar.Value = safePercent;
         ProgressLabel.Text = safePercent + "%";
     }

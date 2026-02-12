@@ -71,6 +71,9 @@
             </Border>
 
             <Border x:Name="InstallTabContent" Style="{StaticResource PanelCardStyle}" Background="#1A1E36" Visibility="Collapsed">
+              <ScrollViewer VerticalScrollBarVisibility="Auto"
+                            HorizontalScrollBarVisibility="Disabled"
+                            CanContentScroll="False">
               <Grid Margin="14">
                 <Grid.RowDefinitions>
                   <RowDefinition Height="Auto" />
@@ -80,8 +83,8 @@
                   <RowDefinition Height="Auto" />
                   <RowDefinition Height="10" />
                   <RowDefinition Height="Auto" />
-                  <RowDefinition Height="6" />
-                  <RowDefinition Height="*" />
+                  <RowDefinition Height="Auto" />
+                  <RowDefinition Height="Auto" />
                   <RowDefinition Height="10" />
                   <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
@@ -89,7 +92,7 @@
                 <Border Grid.Row="0" Style="{StaticResource PanelCardStyle}" Background="#161935">
                   <StackPanel Margin="14">
                     <TextBlock x:Name="StatusText" Text="Checking installation state..." FontSize="18" FontWeight="SemiBold" Style="{StaticResource PrimaryTextStyle}" />
-                    <TextBlock x:Name="DetailText" Margin="0,8,0,0" FontSize="13" Style="{StaticResource SecondaryTextStyle}" TextTrimming="CharacterEllipsis" />
+                    <TextBlock x:Name="DetailText" Margin="0,8,0,0" FontSize="13" Style="{StaticResource SecondaryTextStyle}" TextWrapping="Wrap" />
                   </StackPanel>
                 </Border>
 
@@ -105,26 +108,34 @@
                              Text="Install BloxMC Launcher in %LOCALAPPDATA%\BloxMC"
                              FontSize="12"
                              Style="{StaticResource SecondaryTextStyle}"
-                             TextTrimming="CharacterEllipsis" />
+                             TextWrapping="NoWrap"
+                             TextTrimming="CharacterEllipsis"
+                             ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}" />
                   <TextBlock x:Name="ProgressLabel" Grid.Column="1" FontSize="12" Style="{StaticResource SecondaryTextStyle}" Text="0%" />
                 </Grid>
 
-                <StackPanel Grid.Row="6" Orientation="Horizontal">
+                <StackPanel Grid.Row="6" Orientation="Horizontal" Margin="0,2,0,0">
                   <Button x:Name="PrimaryActionButton" Content="Install" Style="{StaticResource PrimaryPillButton}" Click="PrimaryActionButton_Click" />
                   <Button x:Name="RepairButton" Content="Repair" Margin="10,0,0,0" Style="{StaticResource SecondaryPillButton}" Visibility="Collapsed" Click="RepairButton_Click" />
                   <Button x:Name="UninstallButton" Content="Uninstall" Margin="10,0,0,0" Style="{StaticResource DangerPillButton}" Visibility="Collapsed" Click="UninstallButton_Click" />
                 </StackPanel>
 
-                <TextBlock Grid.Row="7" Text="Live log output" FontSize="12" FontWeight="SemiBold" Style="{StaticResource SecondaryTextStyle}" />
+                <TextBlock Grid.Row="7"
+                           Text="Live log output"
+                           Margin="0,0,0,2"
+                           FontSize="12"
+                           FontWeight="SemiBold"
+                           Style="{StaticResource SecondaryTextStyle}" />
                 <TextBox Grid.Row="8"
                          x:Name="LiveLogTextBox"
                          IsReadOnly="True"
+                         MinHeight="140"
                          TextWrapping="NoWrap"
                          VerticalScrollBarVisibility="Auto"
                          HorizontalScrollBarVisibility="Auto"
                          Style="{StaticResource LogBoxStyle}" />
 
-                <Border Grid.Row="10" x:Name="MessagePanel" Style="{StaticResource PanelCardStyle}" Background="#1A1F33">
+                <Border Grid.Row="10" x:Name="MessagePanel" Margin="0,2,0,0" Style="{StaticResource PanelCardStyle}" Background="#1A1F33">
                   <Grid Margin="14">
                     <Grid.RowDefinitions>
                       <RowDefinition Height="Auto" />
@@ -137,7 +148,7 @@
                     </Grid.RowDefinitions>
 
                     <TextBlock x:Name="MessageTitleText" Grid.Row="0" FontSize="14" FontWeight="SemiBold" Style="{StaticResource PrimaryTextStyle}" Text="Ready." />
-                    <TextBlock x:Name="MessageBodyText" Grid.Row="2" FontSize="12" Style="{StaticResource SecondaryTextStyle}" TextWrapping="Wrap" TextTrimming="CharacterEllipsis" />
+                    <TextBlock x:Name="MessageBodyText" Grid.Row="2" FontSize="12" Style="{StaticResource SecondaryTextStyle}" TextWrapping="Wrap" />
                     <TextBlock x:Name="SupportCodeText" Grid.Row="4" FontSize="12" Style="{StaticResource SecondaryTextStyle}" Text="" />
 
                     <Grid Grid.Row="6">
@@ -164,6 +175,7 @@
                   </Grid>
                 </Border>
               </Grid>
+              </ScrollViewer>
             </Border>
 
             <Border x:Name="SettingsTabContent" Style="{StaticResource PanelCardStyle}" Background="#1A1E36" Visibility="Collapsed">
